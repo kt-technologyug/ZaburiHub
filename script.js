@@ -371,9 +371,8 @@ document.addEventListener('DOMContentLoaded', function() {
 
 // --- ARTISTS PAGE LOGIC ---
 document.addEventListener('DOMContentLoaded', function() {
-    // Only run if on Artists.html (by checking for #artistsList)
     if (document.getElementById('artistsList')) {
-        const ARTISTS_PER_PAGE = 20;
+        const ARTISTS_PER_PAGE = 30;
         let currentArtistPage = 1;
         let filteredArtists = getUniqueArtists();
 
@@ -454,64 +453,72 @@ document.addEventListener('DOMContentLoaded', function() {
         }
 
         function showArtistSongs(artist) {
-    const artistSongsDiv = document.getElementById('artistSongs');
-    const songs = songsData.filter(song => song.artist === artist);
-    if (songs.length === 0) {
-        artistSongsDiv.innerHTML = '<div class="no-results">No songs found for this artist.</div>';
-        return;
-    }
-    let html = `<h3>Songs by ${artist}</h3><ul class="artist-songs-list">`;
-    songs.forEach(song => {
-        html += `<li>
-            <a href="#" class="artist-song-link" data-song-id="${song.id}">
-                <strong>${song.title}</strong>${song.isNew ? ' <span class="new-badge">NEW</span>' : ''}
-            </a>
-        </li>`;
-    });
-    html += '</ul>';
-    artistSongsDiv.innerHTML = html;
+            const artistSongsDiv = document.getElementById('artistSongs');
+            const songs = songsData.filter(song => song.artist === artist);
+            if (songs.length === 0) {
+                artistSongsDiv.innerHTML = '<div class="no-results">No songs found for this artist.</div>';
+                return;
+            }
+            let html = `<h3>Songs by ${artist}</h3><ul class="artist-songs-list">`;
+            songs.forEach(song => {
+                html += `<li>
+                    <a href="#" class="artist-song-link" data-song-id="${song.id}">
+                        <strong>${song.title}</strong>${song.isNew ? ' <span class="new-badge">NEW</span>' : ''}
+                    </a>
+                </li>`;
+            });
+            html += '</ul>';
+            artistSongsDiv.innerHTML = html;
 
-    // Add click event listeners to each song link
-    document.querySelectorAll('.artist-song-link').forEach(link => {
-        link.addEventListener('click', function(e) {
-            e.preventDefault();
-            displayLyricsFromArtistPage(this.dataset.songId);
-        });
-    });
-}
+            // Add click event listeners to each song link
+            document.querySelectorAll('.artist-song-link').forEach(link => {
+                link.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    displayLyricsFromArtistPage(this.dataset.songId);
+                });
+            });
+        }
 
-// Helper function to display lyrics (for Artists page)
-function displayLyricsFromArtistPage(songId) {
-    const song = songsData.find(s => s.id == songId);
-    if (!song) return;
-    const artistSongsDiv = document.getElementById('artistSongs');
-    artistSongsDiv.innerHTML = `
+       function displayLyricsFromArtistPage(songId) {
+        const song = songsData.find(s => s.id == songId);
+            if (!song) return;
+            const artistSongsDiv = document.getElementById('artistSongs');
+            artistSongsDiv.innerHTML = `
         <div class="lyrics-content">
             <h2>${song.title} ${song.isNew ? '<span class="new-badge">NEW</span>' : ''}</h2>
             <h3>by ${song.artist}</h3>
             ${song.addedDate ? `<div class="song-meta">Added on ${formatDate(song.addedDate)}</div>` : ''}
             <div class="lyrics-text">${song.lyrics.replace(/\n/g, '<br>')}</div>
-            <button id="backToSongs" style="margin-top:20px;">&larr; Back to songs</button>
+            <button id="backToSongs" style="margin-top:20px;">
+                <i class="fa-solid fa-arrow-left"></i>
+            </button>
         </div>
     `;
-    // Back button to return to song list
     document.getElementById('backToSongs').onclick = () => showArtistSongs(song.artist);
 }
 
-// Helper to format date (reuse from your main script)
-function formatDate(dateString) {
-    const options = { year: 'numeric', month: 'short', day: 'numeric' };
-    return new Date(dateString).toLocaleDateString('en-US', options);
-}
+        function formatDate(dateString) {
+            const options = { year: 'numeric', month: 'short', day: 'numeric' };
+            return new Date(dateString).toLocaleDateString('en-US', options);
+        }
 
-        // Search functionality
-        const searchInput = document.getElementById('artistSearch');
-        searchInput.addEventListener('input', () => {
+        // Search functionality for header search bar
+        const searchInput = document.getElementById('searchInput');
+        const searchBtn = document.getElementById('searchBtn');
+        function doArtistSearch() {
             const term = searchInput.value.trim().toLowerCase();
             filteredArtists = getUniqueArtists().filter(artist => artist.toLowerCase().includes(term));
             currentArtistPage = 1;
             renderArtistsList();
             document.getElementById('artistSongs').innerHTML = '';
+        }
+        searchInput.addEventListener('input', doArtistSearch);
+        searchBtn.addEventListener('click', function(e) {
+            e.preventDefault();
+            doArtistSearch();
+        });
+        searchInput.addEventListener('keyup', function(e) {
+            if (e.key === 'Enter') doArtistSearch();
         });
 
         renderArtistsList();
