@@ -295,7 +295,7 @@ function stopAllPlayers() {
 function showYouTubeError(button) {
     const errorSpan = document.createElement('span');
     errorSpan.className = 'yt-error';
-    errorSpan.innerHTML = '<i class="fas fa-exclamation-circle"></i> Preview unavailable';
+    errorSpan.innerHTML = '<i class="fas fa-exclamation-circle"></i>Try Again';
     button.parentNode.appendChild(errorSpan);
     setTimeout(() => errorSpan.remove(), 3000);
 }
@@ -743,4 +743,5 @@ document.addEventListener('DOMContentLoaded', function() {
         renderArtistsList();
     }
 });
+
 
