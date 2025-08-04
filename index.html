@@ -6,15 +6,6 @@
     <title>ZaburiHub - Song Lyrics</title>
     <link rel="stylesheet" href="styles.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-
-    <?php
-    // Start session and generate CSRF token
-    session_start();
-    if (empty($_SESSION['csrf_token'])) {
-        $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
-    }
-    ?>
-
 </head>
 <body>
     <header>
@@ -47,13 +38,11 @@
     </header>
 
     <main class="container">
-        <!-- Sidebar Ad -->
         <aside class="sidebar-ad">
             <div class="ad-unit">
                 <span>Advertisement</span>
                 <div class="ad-content">
                     <img src="images/kt-ad.png" alt="KT Media" class="sidebar-ad">
-                    <!-- Ad code here -->
                 </div>
             </div>
         </aside>
@@ -91,7 +80,7 @@
             </div>
         </section>
 
-        <section class="content-section">
+       <section class="content-section">
             <div class="filter-options">
                 <button class="filter-btn" data-filter="new">New Additions</button>
                 <button class="filter-btn" data-filter="all">All Songs</button>
@@ -100,18 +89,8 @@
                 <button class="filter-btn" data-filter="popular">Popular</button>
             </div>
 
-            <!-- In-content Ad -->
-            <div class="in-content-ad">
-                <span>Advertisement</span>
-                <div class="ad-content">
-                    <!-- Ad code here -->
-                </div>
-            </div>
-
             <div class="songs-container">
-                <div class="songs-list" id="songsList">
-                    <!-- Songs will be loaded here by JavaScript -->
-                </div>
+                <div class="songs-list" id="songsList"></div>
                 <div class="lyrics-display" id="lyricsDisplay">
                     <div class="lyrics-placeholder">
                         <i class="fas fa-music"></i>
