@@ -1,13 +1,16 @@
-// Enhanced sample data with timestamps
+// YouTube API Key
+const YOUTUBE_API_KEY = 'AIzaSyA_afmssCDZT-CmWZrxI0BjmQ_EojxbOBA';
+
+// Enhanced song data with YouTube IDs
 const songsData = [
-    { id: 1, title: "Amazing Grace", artist: "John Newton", lyrics: "Amazing grace, how sweet the sound\nThat saved a wretch like me\nI once was lost, but now I'm found\nWas blind, but now I see", addedDate: '2023-10-15' },
+    { id: 1, title: "Amazing Grace", artist: "John Newton", lyrics: "Amazing grace, how sweet the sound\nThat saved a wretch like me\nI once was lost, but now I'm found\nWas blind, but now I see", ytId: "HsCp5LG_zNE", addedDate: '2023-10-15' },
     { id: 2, title: "Blessed Assurance", artist: "Fanny Crosby", lyrics: "Blessed assurance, Jesus is mine\nOh, what a foretaste of glory divine\nHeir of salvation, purchase of God\nBorn of His Spirit, washed in His blood", addedDate: '2023-10-18' },
     { id: 3, title: "Great Is Thy Faithfulness", artist: "Thomas Chisholm", lyrics: "Great is Thy faithfulness, O God my Father\nThere is no shadow of turning with Thee\nThou changest not, Thy compassions they fail not\nAs Thou hast been, Thou forever wilt be", addedDate: '2023-10-20' },
     { id: 4, title: "How Great Thou Art", artist: "Carl Boberg", lyrics: "O Lord my God, when I in awesome wonder\nConsider all the worlds Thy hands have made\nI see the stars, I hear the rolling thunder\nThy power throughout the universe displayed", addedDate: '2023-10-22' },
     { id: 5, title: "It Is Well With My Soul", artist: "Horatio Spafford", lyrics: "When peace like a river attendeth my way\nWhen sorrows like sea billows roll\nWhatever my lot, Thou hast taught me to say\nIt is well, it is well with my soul", addedDate: '2023-10-25' },
     { id: 6, title: "Joy to the World", artist: "Isaac Watts", lyrics: "Joy to the world, the Lord is come\nLet earth receive her King\nLet every heart prepare Him room\nAnd heaven and nature sing", addedDate: '2023-10-28' },
     { id: 7, title: "10,000 Reasons", artist: "Matt Redman", lyrics: "Bless the Lord, O my soul\nO my soul\nWorship His holy name\nSing like never before\nO my soul\nI'll worship Your holy name", addedDate: '2023-11-01', isNew: true },
-    { id: 8, title: "What a Beautiful Name", artist: "Hillsong Worship", lyrics: "You were the Word at the beginning\nOne with God the Lord Most High\nYour hidden glory in creation\nNow revealed in You our Christ", addedDate: '2023-11-05', isNew: true },
+    { id: 8, title: "What a Beautiful Name", artist: "Hillsong Worship", lyrics: "You were the Word at the beginning\n One with God the Lord Most High\n Your hidden glory in creation\n Now revealed in You our Christ\n\n  [Chorus 1] \n What a beautiful Name it is\n What a beautiful Name it is\n The Name of Jesus Christ my King\n What a beautiful Name it is\n Nothing compares to this\n What a beautiful Name it is\n The Name of Jesus\n\n  You didn't want heaven without us\n So Jesus You brought heaven down\n My sin was great Your love was greater\n What could separate us now? \n\n  [Chorus 2] \n What a wonderful Name it is\n What a wonderful Name it is\n The Name of Jesus Christ my King\n What a wonderful Name it is\n Nothing compares to this\n What a wonderful Name it is\n The Name of Jesus\n What a wonderful Name it is\n The Name of Jesus", ytID: "nQWFzMvCfLE", addedDate: '2023-11-05', isNew: true },
     { id: 9, title: "Reckless Love", artist: "Cory Asbury", lyrics: "Before I spoke a word, You were singing over me\nYou have been so, so good to me\nBefore I took a breath, You breathed Your life in me\nYou have been so, so kind to me", addedDate: '2023-11-10', isNew: true },
     { id: 10, title: "Oceans (Where Feet May Fail)", artist: "Hillsong United", lyrics: "You call me out upon the waters\nThe great unknown where feet may fail\nAnd there I find You in the mystery\nIn oceans deep, my faith will stand", addedDate: '2023-11-15', isNew: true },
     { id: 11, title: "Reckless Love", artist: "Cory Asbury", lyrics: "Before I spoke a word, You were singing over me\nYou have been so, so good to me\nBefore I took a breath, You breathed Your life in me\nYou have been so, so kind to me", addedDate: '2023-11-10', isNew: true },
@@ -38,8 +41,291 @@ const songsData = [
     { id: 36, title: "House of Miracles", artist: "Brandon Lake", lyrics: "This is a house of worship\nThis is a place of praise\nWhere every demon trembles\nWhere we proclaim Your name", addedDate: '2024-03-10', isNew: true },
     { id: 37, title: "The Father's House", artist: "Cory Asbury", lyrics: "Sometimes on this journey, I get lost in my mistakes\nWhat looks to me like weakness is a canvas for Your strength\nAnd my story isn't over, my story's just begun", addedDate: '2024-03-15', isNew: true },
     { id: 38, title: "Battle Belongs", artist: "Phil Wickham", lyrics: "When all I see is the battle\nYou see my victory\nWhen all I see is a mountain\nYou see a mountain moved", addedDate: '2024-03-20', isNew: true }
-
 ];
+
+// YouTube Player Management
+let youtubePlayers = {};
+let currentPlayingButton = null;
+
+// Initialize YouTube API
+function loadYouTubeAPI() {
+    const tag = document.createElement('script');
+    tag.src = "https://www.youtube.com/iframe_api";
+    const firstScriptTag = document.getElementsByTagName('script')[0];
+    firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
+}
+
+// Called by YouTube API when ready
+function onYouTubeIframeAPIReady() {
+    console.log("YouTube API ready");
+}
+
+// Create YouTube player for a song
+function createYouTubePlayer(songId, ytId) {
+    youtubePlayers[songId] = new YT.Player(`yt-player-${songId}`, {
+        height: '0',
+        width: '0',
+        videoId: ytId,
+        playerVars: {
+            autoplay: 0,
+            controls: 0,
+            disablekb: 1,
+            modestbranding: 1,
+            rel: 0,
+            enablejsapi: 1
+        },
+        events: {
+            'onReady': onPlayerReady,
+            'onStateChange': onPlayerStateChange
+        }
+    });
+}
+
+function onPlayerReady(event) {
+    console.log("Player ready for song ID:", event.target.a.id);
+}
+
+function onPlayerStateChange(event) {
+    if (event.data === YT.PlayerState.ENDED) {
+        const playerId = event.target.a.id.replace('yt-player-', '');
+        const button = document.querySelector(`.play-preview[data-song-id="${playerId}"]`);
+        if (button) {
+            button.innerHTML = '<i class="fas fa-play"></i> Preview';
+            button.classList.remove('playing');
+        }
+    }
+}
+
+// Search YouTube for audio
+async function searchYouTubeVideo(songTitle, artist) {
+    const cacheKey = `yt-${songTitle}-${artist}`.toLowerCase();
+    const cached = localStorage.getItem(cacheKey);
+    if (cached) {
+        console.log(`Found cached YouTube ID for ${songTitle} by ${artist}: ${cached}`);
+        return cached;
+    }
+
+    const query = `${songTitle} ${artist} official audio`;
+    const url = `https://www.googleapis.com/youtube/v3/search?part=snippet&q=${encodeURIComponent(query)}&type=video&maxResults=1&key=${YOUTUBE_API_KEY}`;
+
+    try {
+        const response = await fetch(url);
+        if (!response.ok) {
+            console.error(`YouTube API error: ${response.status} ${response.statusText}`);
+            throw new Error(`HTTP error: ${response.status}`);
+        }
+        const data = await response.json();
+        console.log(`YouTube API response for "${query}":`, data);
+
+        if (data.items && data.items.length > 0) {
+            const videoId = data.items[0].id.videoId;
+            localStorage.setItem(cacheKey, videoId);
+            console.log(`Cached new YouTube ID ${videoId} for ${songTitle} by ${artist}`);
+            return videoId;
+        }
+        console.warn(`No YouTube videos found for query: ${query}`);
+        return null;
+    } catch (error) {
+        console.error('YouTube API error:', error);
+        return null;
+    }
+}
+
+// Queue system to avoid rate limits
+const youtubeSearchQueue = [];
+let isProcessingQueue = false;
+
+async function processQueue() {
+    if (isProcessingQueue || youtubeSearchQueue.length === 0) return;
+
+    isProcessingQueue = true;
+    const { song, button, resolve } = youtubeSearchQueue.shift();
+
+    try {
+        if (button) {
+            button.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Searching...';
+            button.classList.add('loading');
+            button.dataset.ytidStatus = 'fetching';
+        }
+
+        const videoId = await searchYouTubeVideo(song.title, song.artist);
+        song.ytId = videoId;
+
+        if (button) {
+            button.dataset.ytidStatus = videoId ? 'loaded' : 'failed';
+            if (videoId) {
+                createYouTubePlayer(song.id, videoId);
+            }
+        }
+
+        resolve(videoId);
+    } catch (error) {
+        if (button) button.dataset.ytidStatus = 'failed';
+        resolve(null);
+    } finally {
+        if (button) {
+            button.innerHTML = '<i class="fas fa-play"></i> Preview';
+            button.classList.remove('loading');
+        }
+        isProcessingQueue = false;
+        setTimeout(processQueue, 350);
+    }
+}
+
+function queueYouTubeSearch(song, button = null) {
+    return new Promise(resolve => {
+        youtubeSearchQueue.push({ song, button, resolve });
+        processQueue();
+    });
+}
+
+// Enhance songs with YouTube IDs in the background
+function enhanceSongsWithYouTubeIds() {
+    songsData.forEach(song => {
+        if (!song.ytId) {
+            console.log(`Fetching YouTube ID for ${song.title} by ${song.artist}`);
+            queueYouTubeSearch(song).then(videoId => {
+                // Update button status for this song
+                const button = document.querySelector(`.play-preview[data-song-id="${song.id}"]`);
+                if (button) {
+                    button.dataset.ytidStatus = videoId ? 'loaded' : 'failed';
+                }
+            });
+        } else {
+            console.log(`Skipping YouTube ID fetch for ${song.title} (already has ytId: ${song.ytId})`);
+            const button = document.querySelector(`.play-preview[data-song-id="${song.id}"]`);
+            if (button) button.dataset.ytidStatus = 'loaded';
+        }
+    });
+}
+
+// Audio preview controls
+function setupAudioControls() {
+    document.addEventListener('click', function(e) {
+        const previewButton = e.target.closest('.play-preview');
+        if (previewButton) {
+            e.preventDefault();
+            handlePreviewClick(previewButton);
+        }
+    });
+}
+
+function handlePreviewClick(button) {
+    const songId = button.dataset.songId;
+    const song = songsData.find(s => s.id == songId);
+
+    if (!song) {
+        console.error(`Song with ID ${songId} not found`);
+        return;
+    }
+
+    if (button.classList.contains('playing')) {
+        stopAllPlayers();
+        button.innerHTML = '<i class="fas fa-play"></i> Preview';
+        button.classList.remove('playing');
+        return;
+    }
+
+    stopAllPlayers();
+
+    if (song.ytId && button.dataset.ytidStatus === 'loaded') {
+        playYouTubePreview(songId, button);
+    } else if (!button.dataset.searched && button.dataset.ytidStatus !== 'fetching') {
+        button.dataset.searched = "true";
+        button.dataset.ytidStatus = 'fetching';
+        queueYouTubeSearch(song, button).then(ytId => {
+            if (ytId) {
+                button.dataset.ytidStatus = 'loaded';
+                playYouTubePreview(songId, button);
+            } else {
+                button.dataset.ytidStatus = 'failed';
+                showYouTubeError(button);
+            }
+        });
+    } else if (button.dataset.ytidStatus === 'failed') {
+        showYouTubeError(button);
+    }
+}
+
+function playYouTubePreview(songId, button) {
+    if (!youtubePlayers[songId]) {
+        const song = songsData.find(s => s.id == songId);
+        if (song && song.ytId) {
+            console.log(`Creating YouTube player for song ID ${songId} with ytId ${song.ytId}`);
+            createYouTubePlayer(songId, song.ytId);
+        } else {
+            console.error(`No ytId for song ID ${songId}`);
+            showYouTubeError(button);
+            return;
+        }
+    }
+
+    if (youtubePlayers[songId]) {
+        try {
+            youtubePlayers[songId].playVideo();
+            button.innerHTML = '<i class="fas fa-pause"></i> Pause';
+            button.classList.add('playing');
+            currentPlayingButton = button;
+            console.log(`Playing preview for song ID ${songId}`);
+        } catch (error) {
+            console.error(`Error playing YouTube video for song ID ${songId}:`, error);
+            showYouTubeError(button);
+        }
+    }
+}
+
+function stopAllPlayers() {
+    Object.values(youtubePlayers).forEach(player => {
+        try {
+            player.stopVideo();
+        } catch (e) {
+            console.log("Error stopping player:", e);
+        }
+    });
+
+    if (currentPlayingButton) {
+        currentPlayingButton.innerHTML = '<i class="fas fa-play"></i> Preview';
+        currentPlayingButton.classList.remove('playing');
+        currentPlayingButton = null;
+    }
+}
+
+function showYouTubeError(button) {
+    const errorSpan = document.createElement('span');
+    errorSpan.className = 'yt-error';
+    errorSpan.innerHTML = '<i class="fas fa-exclamation-circle"></i> Preview unavailable';
+    button.parentNode.appendChild(errorSpan);
+    setTimeout(() => errorSpan.remove(), 3000);
+}
+
+// Update song item rendering
+function renderSongItem(song) {
+    const songItem = document.createElement('div');
+    songItem.className = 'song-item';
+    songItem.dataset.id = song.id;
+
+    const newBadge = song.isNew ? '<span class="new-badge">NEW</span>' : '';
+    const dateInfo = currentFilter === 'new' ? `<div class="song-date">Added: ${formatDate(song.addedDate)}</div>` : '';
+
+    songItem.innerHTML = `
+        <div class="song-title">${song.title}${newBadge}</div>
+        <div class="song-artist">${song.artist}</div>
+        ${dateInfo}
+        
+    `;
+
+    return songItem;
+}
+
+// Initialize the app
+async function init() {
+    console.log("Initializing ZaburiHub");
+    loadYouTubeAPI();
+    setupAudioControls();
+    renderSongsList(); // Render immediately
+    enhanceSongsWithYouTubeIds(); // Fetch YouTube IDs in background
+    setupEventListeners();
+}
 
 // DOM Elements
 const songsList = document.getElementById('songsList');
@@ -50,56 +336,26 @@ const filterBtns = document.querySelectorAll('.filter-btn');
 const alphabetLinks = document.querySelectorAll('.alphabet-letters a');
 const pagination = document.getElementById('pagination');
 
-function doArtistSearch() {
-    const term = searchInput.value.trim().toLowerCase();
-    filteredArtists = getUniqueArtists().filter(artist => artist.toLowerCase().includes(term));
-    currentArtistPage = 1;
-    renderArtistsList();
-    document.getElementById('artistSongs').innerHTML = '';
-}
-
-searchInput.addEventListener('input', doArtistSearch);
-searchBtn.addEventListener('click', function(e) {
-    e.preventDefault();
-    doArtistSearch();
-});
-searchInput.addEventListener('keyup', function(e) {
-    if (e.key === 'Enter') {
-        doArtistSearch();
-    }
-});
-
-
 // Pagination state
 let currentPage = 1;
-const SONGS_PER_PAGE = 15;
+const SONGS_PER_PAGE = 10;
 
 // Current filter state
-let currentFilter = 'new'; // Default to show new additions
+let currentFilter = 'new';
 let currentSearchTerm = '';
 
 // Filters that should use pagination
 const paginatedFilters = ['all', 'new', 'title', 'artist', 'popular'];
 
-// Initialize the app
-function init() {
-    const newBtn = document.querySelector('.filter-btn[data-filter="new"]');
-    if (newBtn) newBtn.classList.add('active');
-    renderSongsList();
-    setupEventListeners();
-}
-
 // Render songs list based on current filter and search
 function renderSongsList(customFilter) {
-    songsList.innerHTML = '';
+    songsList.innerHTML = '<div class="loading">Loading songs...</div>';
 
     let filteredSongs = [...songsData];
 
-    // Apply custom filter if provided (for alphabet links)
     if (typeof customFilter === 'function') {
         filteredSongs = filteredSongs.filter(customFilter);
     } else {
-        // Apply search filter
         if (currentSearchTerm) {
             const searchTerm = currentSearchTerm.toLowerCase();
             filteredSongs = filteredSongs.filter(song =>
@@ -108,7 +364,6 @@ function renderSongsList(customFilter) {
             );
         }
 
-        // Apply filter
         switch (currentFilter) {
             case 'new':
                 filteredSongs = filteredSongs.filter(song => song.isNew);
@@ -118,23 +373,19 @@ function renderSongsList(customFilter) {
                 filteredSongs.sort((a, b) => a.title.localeCompare(b.title));
                 break;
             case 'artist':
-                filteredSongs.sort((a, b) => a.artist.localeCompare(b.artist));
+                filteredSongs.sort((a, b) => a.artist.localeCompare(b.title));
                 break;
             case 'popular':
                 filteredSongs.sort((a, b) => b.id - a.id);
                 break;
-            default: // 'all'
+            default:
                 filteredSongs.sort((a, b) => new Date(b.addedDate) - new Date(a.addedDate));
         }
     }
 
-    // Pagination for all main filters (except alphabet links/search)
     let paginatedSongs = filteredSongs;
     let totalPages = 1;
-    if (
-        paginatedFilters.includes(currentFilter) &&
-        typeof customFilter !== 'function'
-    ) {
+    if (paginatedFilters.includes(currentFilter) && typeof customFilter !== 'function') {
         totalPages = Math.ceil(filteredSongs.length / SONGS_PER_PAGE);
         if (currentPage > totalPages) currentPage = totalPages;
         if (currentPage < 1) currentPage = 1;
@@ -146,6 +397,8 @@ function renderSongsList(customFilter) {
         totalPages = 1;
     }
 
+    songsList.innerHTML = ''; // Clear loading message
+
     if (paginatedSongs.length === 0) {
         songsList.innerHTML = '<div class="no-results">No songs found matching your criteria.</div>';
         if (pagination) pagination.innerHTML = '';
@@ -153,27 +406,11 @@ function renderSongsList(customFilter) {
     }
 
     paginatedSongs.forEach(song => {
-        const songItem = document.createElement('div');
-        songItem.className = 'song-item';
-        songItem.dataset.id = song.id;
-
-        const newBadge = song.isNew ? '<span class="new-badge">NEW</span>' : '';
-
-        songItem.innerHTML = `
-            <div class="song-title">${song.title}${newBadge}</div>
-            <div class="song-artist">${song.artist}</div>
-            ${currentFilter === 'new' ? `<div class="song-date">Added: ${formatDate(song.addedDate)}</div>` : ''}
-        `;
-
+        const songItem = renderSongItem(song);
         songsList.appendChild(songItem);
     });
 
-    // Render pagination if needed
-    if (
-        paginatedFilters.includes(currentFilter) &&
-        totalPages > 1 &&
-        typeof customFilter !== 'function'
-    ) {
+    if (paginatedFilters.includes(currentFilter) && totalPages > 1 && typeof customFilter !== 'function') {
         renderPagination(currentPage, totalPages);
     } else if (pagination) {
         pagination.innerHTML = '';
@@ -184,38 +421,31 @@ function renderPagination(current, total) {
     if (!pagination) return;
     let html = '';
 
-    // Previous button
     if (current > 1) {
         html += `<button class="page-btn" data-page="${current - 1}">&laquo;</button>`;
     }
 
-    // Previous two pages
     for (let i = Math.max(1, current - 2); i < current; i++) {
         html += `<button class="page-btn" data-page="${i}">${i}</button>`;
     }
 
-    // Current page
     html += `<button class="page-btn active" data-page="${current}">${current}</button>`;
 
-    // Next two pages
     for (let i = current + 1; i <= Math.min(total, current + 2); i++) {
         html += `<button class="page-btn" data-page="${i}">${i}</button>`;
     }
 
-    // Last page (if not already shown)
     if (current + 2 < total) {
         if (current + 2 < total - 1) html += `<span class="page-ellipsis">...</span>`;
         html += `<button class="page-btn" data-page="${total}">${total}</button>`;
     }
 
-    // Next button
     if (current < total) {
         html += `<button class="page-btn" data-page="${current + 1}">&raquo;</button>`;
     }
 
     pagination.innerHTML = html;
 
-    // Add event listeners
     pagination.querySelectorAll('.page-btn').forEach(btn => {
         btn.addEventListener('click', () => {
             currentPage = parseInt(btn.dataset.page, 10);
@@ -230,21 +460,18 @@ function formatDate(dateString) {
     return new Date(dateString).toLocaleDateString('en-US', options);
 }
 
-// Display lyrics for a song (mobile: below title, desktop: main panel)
+// Display lyrics for a song
 function displayLyrics(songId) {
     const song = songsData.find(s => s.id === parseInt(songId));
     if (!song) return;
 
-    // Remove active class from all song items
     document.querySelectorAll('.song-item').forEach(item => {
         item.classList.remove('active');
     });
 
-    // Add active class to selected song
     const selectedSongItem = document.querySelector(`.song-item[data-id="${songId}"]`);
     if (selectedSongItem) selectedSongItem.classList.add('active');
 
-    // Lyrics HTML
     const lyricsHTML = `
         <div class="lyrics-content mobile-lyrics-content">
             <h2>${song.title} ${song.isNew ? '<span class="new-badge">NEW</span>' : ''}</h2>
@@ -256,12 +483,16 @@ function displayLyrics(songId) {
                 <div class="ad-content">Related Songs You Might Like</div>
             </div>
         </div>
+        <div class="audio-controls" style="margin-top: 20px;">
+            <button class="play-preview" data-song-id="${song.id}" data-ytid-status="${song.ytId ? 'loaded' : 'pending'}">
+                <i class="fas fa-play"></i> Preview
+            </button>
+            <div id="yt-player-${song.id}" class="yt-player"></div>
+        </div>
     `;
 
-    // Remove any existing inline lyrics display
     document.querySelectorAll('.inline-lyrics-display').forEach(el => el.remove());
 
-    // On mobile, insert lyrics after the selected song item
     if (window.innerWidth <= 768) {
         const lyricsDiv = document.createElement('div');
         lyricsDiv.className = 'inline-lyrics-display';
@@ -269,10 +500,8 @@ function displayLyrics(songId) {
         if (selectedSongItem) {
             selectedSongItem.insertAdjacentElement('afterend', lyricsDiv);
         }
-        // Hide the main lyrics panel
         if (lyricsDisplay) lyricsDisplay.innerHTML = '';
     } else {
-        // On desktop, show in the main lyrics panel
         if (lyricsDisplay) lyricsDisplay.innerHTML = lyricsHTML;
     }
 }
@@ -287,7 +516,6 @@ window.addEventListener('resize', () => {
 
 // Setup event listeners
 function setupEventListeners() {
-    // Song item click
     songsList.addEventListener('click', (e) => {
         const songItem = e.target.closest('.song-item');
         if (songItem) {
@@ -295,28 +523,24 @@ function setupEventListeners() {
         }
     });
 
-    // Filter buttons
     filterBtns.forEach(btn => {
         btn.addEventListener('click', () => {
             filterBtns.forEach(b => b.classList.remove('active'));
             btn.classList.add('active');
             currentFilter = btn.dataset.filter;
-            currentPage = 1; // Reset to first page
+            currentPage = 1;
             renderSongsList();
         });
     });
 
-    // Alphabet links
     alphabetLinks.forEach(link => {
         link.addEventListener('click', (e) => {
             e.preventDefault();
             const letter = link.textContent;
 
-            // Remove .active from all, add to clicked
             alphabetLinks.forEach(l => l.classList.remove('active'));
             link.classList.add('active');
 
-            // Filter songs by first letter (no pagination for alphabet links)
             renderSongsList(song =>
                 letter === '0-9'
                     ? /^[0-9]/.test(song.title)
@@ -325,7 +549,6 @@ function setupEventListeners() {
         });
     });
 
-    // Search functionality
     searchBtn.addEventListener('click', () => {
         currentSearchTerm = searchInput.value.trim();
         currentPage = 1;
@@ -340,7 +563,6 @@ function setupEventListeners() {
         }
     });
 
-    // Live search
     searchInput.addEventListener('input', () => {
         currentSearchTerm = searchInput.value.trim();
         currentPage = 1;
@@ -369,7 +591,7 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 });
 
-// --- ARTISTS PAGE LOGIC ---
+// Artists page logic
 document.addEventListener('DOMContentLoaded', function() {
     if (document.getElementById('artistsList')) {
         const ARTISTS_PER_PAGE = 30;
@@ -411,7 +633,6 @@ document.addEventListener('DOMContentLoaded', function() {
             });
             artistsListDiv.appendChild(ul);
 
-            // Pagination
             let html = '';
             if (totalPages > 1) {
                 if (currentArtistPage > 1) {
@@ -434,7 +655,6 @@ document.addEventListener('DOMContentLoaded', function() {
             }
             artistPagination.innerHTML = html;
 
-            // Pagination event listeners
             artistPagination.querySelectorAll('.page-btn').forEach(btn => {
                 btn.addEventListener('click', () => {
                     currentArtistPage = parseInt(btn.dataset.page, 10);
@@ -443,7 +663,6 @@ document.addEventListener('DOMContentLoaded', function() {
                 });
             });
 
-            // Artist click event
             document.querySelectorAll('.artist-item a').forEach(link => {
                 link.addEventListener('click', e => {
                     e.preventDefault();
@@ -470,7 +689,6 @@ document.addEventListener('DOMContentLoaded', function() {
             html += '</ul>';
             artistSongsDiv.innerHTML = html;
 
-            // Add click event listeners to each song link
             document.querySelectorAll('.artist-song-link').forEach(link => {
                 link.addEventListener('click', function(e) {
                     e.preventDefault();
@@ -479,32 +697,30 @@ document.addEventListener('DOMContentLoaded', function() {
             });
         }
 
-       function displayLyricsFromArtistPage(songId) {
-        const song = songsData.find(s => s.id == songId);
+        function displayLyricsFromArtistPage(songId) {
+            const song = songsData.find(s => s.id == songId);
             if (!song) return;
             const artistSongsDiv = document.getElementById('artistSongs');
             artistSongsDiv.innerHTML = `
-        <div class="lyrics-content">
-            <h2>${song.title} ${song.isNew ? '<span class="new-badge">NEW</span>' : ''}</h2>
-            <h3>by ${song.artist}</h3>
-            ${song.addedDate ? `<div class="song-meta">Added on ${formatDate(song.addedDate)}</div>` : ''}
-            <div class="lyrics-text">${song.lyrics.replace(/\n/g, '<br>')}</div>
-            <button id="backToSongs" style="margin-top:20px;">
-                <i class="fa-solid fa-arrow-left"></i>
-            </button>
-        </div>
-    `;
-    document.getElementById('backToSongs').onclick = () => showArtistSongs(song.artist);
-}
-
-        function formatDate(dateString) {
-            const options = { year: 'numeric', month: 'short', day: 'numeric' };
-            return new Date(dateString).toLocaleDateString('en-US', options);
+                <div class="lyrics-content">
+                    <h2>${song.title} ${song.isNew ? '<span class="new-badge">NEW</span>' : ''}</h2>
+                    <h3>by ${song.artist}</h3>
+                    ${song.addedDate ? `<div class="song-meta">Added on ${formatDate(song.addedDate)}</div>` : ''}
+                    <div class="lyrics-text">${song.lyrics.replace(/\n/g, '<br>')}</div>
+                    <div class="audio-controls" style="margin-top: 20px;">
+                        <button class="play-preview" data-song-id="${song.id}" data-ytid-status="${song.ytId ? 'loaded' : 'pending'}">
+                            <i class="fas fa-play"></i> Preview
+                        </button>
+                        <div id="yt-player-${song.id}" class="yt-player"></div>
+                    </div>
+                    <button id="backToSongs" style="margin-top:20px;">
+                        <i class="fa-solid fa-arrow-left"></i>
+                    </button>
+                </div>
+            `;
+            document.getElementById('backToSongs').onclick = () => showArtistSongs(song.artist);
         }
 
-        // Search functionality for header search bar
-        const searchInput = document.getElementById('searchInput');
-        const searchBtn = document.getElementById('searchBtn');
         function doArtistSearch() {
             const term = searchInput.value.trim().toLowerCase();
             filteredArtists = getUniqueArtists().filter(artist => artist.toLowerCase().includes(term));
@@ -512,6 +728,7 @@ document.addEventListener('DOMContentLoaded', function() {
             renderArtistsList();
             document.getElementById('artistSongs').innerHTML = '';
         }
+
         searchInput.addEventListener('input', doArtistSearch);
         searchBtn.addEventListener('click', function(e) {
             e.preventDefault();
