@@ -303,6 +303,26 @@ nav {
     color: var(--dark-gray);
 }
 
+/* Center lyrics and song title in lyrics-content (Artists page) */
+.lyrics-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+}
+
+.lyrics-content h2,
+.lyrics-content h3 {
+    text-align: center;
+    width: 100%;
+}
+
+.lyrics-content .lyrics-text {
+    text-align: center;
+    margin: 0 auto;
+}
+
 .lyrics-text {
     white-space: pre-line;
     line-height: 1.8;
@@ -415,6 +435,12 @@ footer {
     .filter-options {
         flex-wrap: wrap;
     }
+
+    .sidebar-ad {
+        max-width: 98vw;
+        margin: 10px auto;
+        padding: 0;
+    }
     
 }
 
@@ -446,13 +472,13 @@ footer {
 }
 
 .ad-content {
-    background-color: white;
+    background-color: rgba(255, 255, 255, 0);
     padding: 20px;
     border-radius: 5px;
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.0);
     min-height: 90px;
     display: flex;
-    align-items: center;
+    align-items: center;    
     justify-content: center;
     color: var(--dark-gray);
     font-size: 14px;
@@ -463,14 +489,15 @@ footer {
     float: left;
     margin-right: 30px;
     position: sticky;
+    margin-left: 30px;
     top: 100px;
 }
 
 .sidebar-ad .ad-unit {
-    background-color: white;
+    background-color: rgba(255, 255, 255, 0);
     padding: 15px;
     border-radius: 5px;
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0);
     margin-bottom: 30px;
 }
 
@@ -478,7 +505,7 @@ footer {
     display: block;
     font-size: 11px;
     color: var(--dark-gray);
-    margin-bottom: 5px;
+    margin-bottom: -15px;
     text-transform: uppercase;
 }
 
@@ -491,6 +518,7 @@ footer {
 
 .in-content-ad {
     margin: 20px 0;
+    margin-left: 220px;
     background-color: white;
     padding: 15px;
     border-radius: 5px;
@@ -524,7 +552,29 @@ footer {
 /* Responsive Adjustments */
 @media (max-width: 1024px) {
     .sidebar-ad {
-        display: none;
+        float: none;
+        margin: 20px auto;
+        width: 100%;
+        max-width: 350px;
+        position: static;
+    }
+
+    .sidebar-ad .ad-unit {
+        margin-bottom: 20px;
+        padding: 10px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+    }
+    .sidebar-ad .ad-content {
+        min-height: 120px;
+        justify-content: center;
+        align-items: center;
+        display: flex;
+    }
+    .sidebar-ad img {
+        max-width: 100%;
+        height: auto;
+        display: block;
+        margin: 0 auto;
     }
 }
 
@@ -804,3 +854,5 @@ footer {
     padding: 6px 0;
     border-bottom: 1px solid #eee;
 }
+
+
